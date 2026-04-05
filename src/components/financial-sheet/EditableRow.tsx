@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
-import { cn, formatRON } from '../../lib/utils'
+import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 
 interface EditableRowProps {
   label: string
@@ -26,9 +27,12 @@ export const EditableRow: React.FC<EditableRowProps> = ({
   onUpdate,
   onDelete,
   showSecondary = false,
-  primaryLabel = 'Denumire',
-  amountLabel = 'Sumă',
+  primaryLabel,
+  amountLabel,
 }) => {
+  const { t, formatMoney } = usePreferences()
+  const resolvedPrimaryLabel = primaryLabel ?? t.expenseName
+  const resolvedAmountLabel = amountLabel ?? t.amount
   const [editing, setEditing] = useState(false)
   const [editLabel, setEditLabel] = useState(label)
   const [editAmount, setEditAmount] = useState(String(amount))
@@ -66,14 +70,14 @@ export const EditableRow: React.FC<EditableRowProps> = ({
           value={editLabel}
           onChange={(e) => setEditLabel(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={primaryLabel}
+          placeholder={resolvedPrimaryLabel}
           className="flex-1 min-w-0 text-sm bg-transparent border-b border-indigo-300 dark:border-indigo-600 focus:outline-none text-gray-900 dark:text-gray-100"
         />
         <input
           value={editAmount}
           onChange={(e) => setEditAmount(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={amountLabel}
+          placeholder={resolvedAmountLabel}
           type="text"
           inputMode="decimal"
           className="w-24 text-sm bg-transparent border-b border-indigo-300 dark:border-indigo-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
@@ -121,12 +125,12 @@ export const EditableRow: React.FC<EditableRowProps> = ({
         </div>
         {showSecondary && secondaryAmount !== undefined && secondaryAmount > 0 && (
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-            {secondaryLabel}: {formatRON(secondaryAmount)}
+            {secondaryLabel}: {formatMoney(secondaryAmount)}
           </p>
         )}
       </div>
       <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums shrink-0">
-        {formatRON(amount)}
+        {formatMoney(amount)}
       </span>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <button

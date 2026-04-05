@@ -4,7 +4,8 @@ import {
   ResponsiveContainer, Legend,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, Skeleton } from '../ui'
-import { formatRON, getLast12MonthRanges, getMonthRange } from '../../lib/utils'
+import { getLast12MonthRanges, getMonthRange } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import { supabase } from '../../lib/supabase'
 
 interface MonthlyChartProps {
@@ -19,6 +20,7 @@ interface MonthlyData {
 }
 
 export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
+  const { t, formatMoney } = usePreferences()
   const [data, setData] = useState<MonthlyData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -61,7 +63,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
   if (loading) {
     return (
       <Card>
-        <CardHeader><CardTitle>Evoluție lunară (12 luni)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.monthlyEvolution}</CardTitle></CardHeader>
         <Skeleton className="h-56" />
       </Card>
     )
@@ -70,7 +72,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Evoluție lunară (12 luni)</CardTitle>
+        <CardTitle>{t.monthlyEvolution}</CardTitle>
       </CardHeader>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -84,7 +86,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
             width={35}
           />
           <Tooltip
-            formatter={((value: unknown, name: string) => [formatRON(Number(value ?? 0)), name]) as never}
+            formatter={((value: unknown, name: string) => [formatMoney(Number(value ?? 0)), name]) as never}
             contentStyle={{
               borderRadius: '12px',
               border: '1px solid #e5e7eb',
@@ -95,7 +97,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
           <Line
             type="monotone"
             dataKey="venituri"
-            name="Venituri"
+            name={t.income}
             stroke="#22c55e"
             strokeWidth={2}
             dot={false}
@@ -104,7 +106,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
           <Line
             type="monotone"
             dataKey="cheltuieli"
-            name="Cheltuieli"
+            name={t.expenses}
             stroke="#ef4444"
             strokeWidth={2}
             dot={false}
@@ -113,7 +115,7 @@ export const MonthlyChart: React.FC<MonthlyChartProps> = ({ userId }) => {
           <Line
             type="monotone"
             dataKey="economii"
-            name="Economii"
+            name={t.savings}
             stroke="#6366f1"
             strokeWidth={2}
             strokeDasharray="5 5"

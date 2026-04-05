@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Card, CardHeader, CardTitle, Button } from '../ui'
 import { EditableRow } from './EditableRow'
-import { formatRON } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { FinancialFixedExpense } from '../../types'
 
 interface FixedExpensesSectionProps {
@@ -16,6 +16,7 @@ interface FixedExpensesSectionProps {
 export const FixedExpensesSection: React.FC<FixedExpensesSectionProps> = ({
   expenses, total, onAdd, onUpdate, onDelete,
 }) => {
+  const { t, formatMoney } = usePreferences()
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
@@ -33,13 +34,13 @@ export const FixedExpensesSection: React.FC<FixedExpensesSectionProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cheltuieli fixe</CardTitle>
+        <CardTitle>{t.fixedExpensesSection}</CardTitle>
         <div className="flex items-center gap-3">
           <span className="text-base font-bold text-red-500 dark:text-red-400 tabular-nums">
-            {formatRON(total)}
+            {formatMoney(total)}
           </span>
           <Button size="sm" variant="ghost" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setAdding(true)}>
-            Adaugă
+            {t.addCategory}
           </Button>
         </div>
       </CardHeader>
@@ -65,26 +66,26 @@ export const FixedExpensesSection: React.FC<FixedExpensesSectionProps> = ({
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              placeholder="Tip cheltuială fixă"
+              placeholder={t.expenseName}
               className="flex-1 min-w-0 text-sm bg-transparent border-b border-red-300 dark:border-red-600 focus:outline-none text-gray-900 dark:text-gray-100"
             />
             <input
               value={newAmount}
               onChange={(e) => setNewAmount(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              placeholder="Sumă"
+              placeholder={t.amount}
               type="text"
               inputMode="decimal"
               className="w-24 text-sm bg-transparent border-b border-red-300 dark:border-red-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
             />
-            <Button size="sm" variant="primary" onClick={handleAdd}>Adaugă</Button>
-            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Anulează</Button>
+            <Button size="sm" variant="primary" onClick={handleAdd}>{t.addCategory}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>{t.cancel}</Button>
           </div>
         )}
 
         {expenses.length === 0 && !adding && (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-            Adaugă cheltuielile fixe lunare (chirie, abonamente etc.)
+            {t.noFixedExpenses}
           </p>
         )}
       </div>

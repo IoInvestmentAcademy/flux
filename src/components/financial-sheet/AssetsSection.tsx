@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { Card, CardHeader, CardTitle, Button, Badge, Select } from '../ui'
+import { Card, CardHeader, CardTitle, Button, Badge } from '../ui'
 import { EditableRow } from './EditableRow'
-import { formatRON, ASSET_TYPE_LABELS } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { FinancialAsset, AssetType } from '../../types'
 
 interface AssetsSectionProps {
@@ -22,11 +22,21 @@ const ASSET_BADGE_COLORS: Record<AssetType, 'success' | 'info' | 'warning' | 'pu
   other: 'default',
 }
 
-const ASSET_TYPE_OPTIONS = Object.entries(ASSET_TYPE_LABELS).map(([value, label]) => ({ value, label }))
-
 export const AssetsSection: React.FC<AssetsSectionProps> = ({
   assets, totalValue, totalIncome, onAdd, onUpdate, onDelete,
 }) => {
+  const { t, formatMoney } = usePreferences()
+
+  const ASSET_TYPE_LABELS_I18N: Record<AssetType, string> = {
+    cash: t.cashAsset,
+    investment: t.investmentAsset,
+    real_estate: t.realEstateAsset,
+    vehicle: t.vehicleAsset,
+    other: t.otherAsset,
+  }
+
+  const ASSET_TYPE_OPTIONS = Object.entries(ASSET_TYPE_LABELS_I18N).map(([value, label]) => ({ value, label }))
+
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newValue, setNewValue] = useState('')
@@ -44,22 +54,22 @@ export const AssetsSection: React.FC<AssetsSectionProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Active</CardTitle>
+        <CardTitle>{t.assets}</CardTitle>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-xs text-gray-400 dark:text-gray-500">Valoare totală</p>
-            <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400 tabular-nums">{formatRON(totalValue)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t.totalAssets}</p>
+            <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400 tabular-nums">{formatMoney(totalValue)}</p>
           </div>
           <Button size="sm" variant="ghost" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setAdding(true)}>
-            Adaugă
+            {t.addCategory}
           </Button>
         </div>
       </CardHeader>
 
       {totalIncome > 0 && (
         <div className="mb-3 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-xl text-sm">
-          <span className="text-gray-500 dark:text-gray-400">Venit lunar din active: </span>
-          <span className="font-semibold text-green-600 dark:text-green-400">{formatRON(totalIncome)}</span>
+          <span className="text-gray-500 dark:text-gray-400">{t.income}: </span>
+          <span className="font-semibold text-green-600 dark:text-green-400">{formatMoney(totalIncome)}</span>
         </div>
       )}
 
@@ -69,13 +79,13 @@ export const AssetsSection: React.FC<AssetsSectionProps> = ({
             key={asset.id}
             label={asset.name}
             amount={asset.value}
-            amountLabel="Valoare"
+            amountLabel={t.totalAssets}
             secondaryAmount={asset.monthly_income}
-            secondaryLabel="Venit/lună"
+            secondaryLabel={t.monthlyPayment}
             showSecondary={true}
             badgeContent={
               <Badge variant={ASSET_BADGE_COLORS[asset.asset_type]}>
-                {ASSET_TYPE_LABELS[asset.asset_type]}
+                {ASSET_TYPE_LABELS_I18N[asset.asset_type]}
               </Badge>
             }
             onUpdate={async (label, value, monthlyIncome) => {
@@ -92,7 +102,7 @@ export const AssetsSection: React.FC<AssetsSectionProps> = ({
                 autoFocus
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Denumire activ"
+                placeholder={t.assetName}
                 className="flex-1 text-sm bg-transparent border-b border-indigo-300 dark:border-indigo-600 focus:outline-none text-gray-900 dark:text-gray-100"
               />
             </div>
@@ -107,7 +117,7 @@ export const AssetsSection: React.FC<AssetsSectionProps> = ({
               <input
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
-                placeholder="Valoare"
+                placeholder={t.amount}
                 type="text"
                 inputMode="decimal"
                 className="w-24 text-sm bg-transparent border-b border-indigo-300 dark:border-indigo-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
@@ -115,22 +125,22 @@ export const AssetsSection: React.FC<AssetsSectionProps> = ({
               <input
                 value={newIncome}
                 onChange={(e) => setNewIncome(e.target.value)}
-                placeholder="Venit/lună"
+                placeholder={t.monthlyPayment}
                 type="text"
                 inputMode="decimal"
                 className="w-24 text-sm bg-transparent border-b border-indigo-300 dark:border-indigo-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="primary" onClick={handleAdd}>Adaugă</Button>
-              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Anulează</Button>
+              <Button size="sm" variant="primary" onClick={handleAdd}>{t.addCategory}</Button>
+              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>{t.cancel}</Button>
             </div>
           </div>
         )}
 
         {assets.length === 0 && !adding && (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-            Adaugă activele tale (economii, investiții, imobiliare etc.)
+            {t.noAssets}
           </p>
         )}
       </div>

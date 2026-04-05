@@ -1,6 +1,7 @@
 import React from 'react'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { cn, formatRON } from '../../lib/utils'
+import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import { Card } from '../ui'
 
 interface NetWorthCardProps {
@@ -22,6 +23,7 @@ export const NetWorthCard: React.FC<NetWorthCardProps> = ({
   icon,
   loading = false,
 }) => {
+  const { formatMoney } = usePreferences()
   const isPositive = (change ?? 0) > 0
   const isNeutral = change === undefined || change === 0
   const absChange = Math.abs(change ?? 0)
@@ -51,7 +53,7 @@ export const NetWorthCard: React.FC<NetWorthCardProps> = ({
         )}
       </div>
       <p className={cn('text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1 tabular-nums')}>
-        {formatRON(value)}
+        {formatMoney(value)}
       </p>
       {change !== undefined && (
         <div className="flex items-center gap-1">
@@ -68,7 +70,7 @@ export const NetWorthCard: React.FC<NetWorthCardProps> = ({
               isNeutral ? 'text-gray-400' : isPositive ? 'text-green-500' : 'text-red-500'
             )}
           >
-            {isNeutral ? '—' : `${isPositive ? '+' : '−'}${formatRON(absChange)}`}
+            {isNeutral ? '—' : `${isPositive ? '+' : '−'}${formatMoney(absChange)}`}
           </span>
           {changeLabel && (
             <span className="text-xs text-gray-400 dark:text-gray-500">{changeLabel}</span>

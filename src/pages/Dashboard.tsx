@@ -12,6 +12,7 @@ import { useCustomFields } from '../hooks/useCustomFields'
 import { useFinancialSheet } from '../hooks/useFinancialSheet'
 import { useToast } from '../components/ui/ToastProvider'
 import { getMonthRange } from '../lib/utils'
+import { usePreferences } from '../lib/PreferencesContext'
 import type { Transaction } from '../types'
 
 interface DashboardProps {
@@ -19,6 +20,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
+  const { t, language } = usePreferences()
   const [showAddModal, setShowAddModal] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
   const { showSuccess, showError } = useToast()
@@ -54,7 +56,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     if (error) {
       showError(error)
     } else {
-      showSuccess('Tranzacție adăugată cu succes!')
+      showSuccess(t.transactionAdded)
       setShowAddModal(false)
     }
   }
@@ -63,9 +65,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     <div className="space-y-5 max-w-6xl mx-auto">
       {/* Page title */}
       <div className="hidden md:block">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.dashboard}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {new Date().toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
       </div>
 
@@ -100,7 +102,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title="Tranzacție nouă"
+        title={t.newTransaction}
       >
         <TransactionForm
           categories={categories}

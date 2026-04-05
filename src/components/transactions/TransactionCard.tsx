@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
-import { cn, formatRON } from '../../lib/utils'
+import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { Transaction, Category, CustomFieldDefinition } from '../../types'
 
 interface TransactionCardProps {
@@ -18,6 +19,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { t, formatMoney } = usePreferences()
   const [expanded, setExpanded] = useState(false)
 
   const isExpense = transaction.type === 'expense'
@@ -49,7 +51,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-            {category?.name ?? 'Fără categorie'}
+            {category?.name ?? t.noCategory}
           </p>
           {transaction.detail && (
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{transaction.detail}</p>
@@ -64,7 +66,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
               isExpense ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400'
             )}
           >
-            {isExpense ? '−' : '+'}{formatRON(transaction.amount)}
+            {isExpense ? '−' : '+'}{formatMoney(transaction.amount)}
           </span>
           <span className="text-gray-400">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -87,7 +89,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
               <div key={field.id} className="flex items-center justify-between text-xs">
                 <span className="text-gray-400 dark:text-gray-500">{field.name}</span>
                 <span className="text-gray-700 dark:text-gray-300">
-                  {field.field_type === 'boolean' ? (value ? 'Da' : 'Nu') : String(value)}
+                  {field.field_type === 'boolean' ? (value ? t.yes : t.no) : String(value)}
                 </span>
               </div>
             )
@@ -100,14 +102,14 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
             >
               <Pencil className="w-3 h-3" />
-              Editează
+              {t.edit}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(transaction.id) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
             >
               <Trash2 className="w-3 h-3" />
-              Șterge
+              {t.delete}
             </button>
           </div>
         </div>

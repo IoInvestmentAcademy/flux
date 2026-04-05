@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Card, CardHeader, CardTitle, Button, Badge } from '../ui'
 import { EditableRow } from './EditableRow'
-import { formatRON, LIABILITY_TYPE_LABELS } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { FinancialLiability, LiabilityType } from '../../types'
 
 interface LiabilitiesSectionProps {
@@ -14,11 +14,21 @@ interface LiabilitiesSectionProps {
   onDelete: (id: string) => Promise<{ error: string | null }>
 }
 
-const LIABILITY_TYPE_OPTIONS = Object.entries(LIABILITY_TYPE_LABELS).map(([value, label]) => ({ value, label }))
-
 export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
   liabilities, totalBalance, totalPayments, onAdd, onUpdate, onDelete,
 }) => {
+  const { t, formatMoney } = usePreferences()
+
+  const LIABILITY_TYPE_LABELS_I18N: Record<LiabilityType, string> = {
+    mortgage: t.mortgageLiability,
+    car_loan: t.carLoanLiability,
+    personal_loan: t.personalLoanLiability,
+    credit_card: t.creditCardLiability,
+    other: t.otherLiability,
+  }
+
+  const LIABILITY_TYPE_OPTIONS = Object.entries(LIABILITY_TYPE_LABELS_I18N).map(([value, label]) => ({ value, label }))
+
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newBalance, setNewBalance] = useState('')
@@ -36,22 +46,22 @@ export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pasive (Datorii)</CardTitle>
+        <CardTitle>{t.liabilities}</CardTitle>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-xs text-gray-400 dark:text-gray-500">Sold total</p>
-            <p className="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums">{formatRON(totalBalance)}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t.totalLiabilities}</p>
+            <p className="text-sm font-bold text-red-500 dark:text-red-400 tabular-nums">{formatMoney(totalBalance)}</p>
           </div>
           <Button size="sm" variant="ghost" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setAdding(true)}>
-            Adaugă
+            {t.addCategory}
           </Button>
         </div>
       </CardHeader>
 
       {totalPayments > 0 && (
         <div className="mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl text-sm">
-          <span className="text-gray-500 dark:text-gray-400">Plăți lunare: </span>
-          <span className="font-semibold text-red-500 dark:text-red-400">{formatRON(totalPayments)}</span>
+          <span className="text-gray-500 dark:text-gray-400">{t.monthlyPayment}: </span>
+          <span className="font-semibold text-red-500 dark:text-red-400">{formatMoney(totalPayments)}</span>
         </div>
       )}
 
@@ -61,13 +71,13 @@ export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
             key={liability.id}
             label={liability.name}
             amount={liability.balance}
-            amountLabel="Sold"
+            amountLabel={t.totalLiabilities}
             secondaryAmount={liability.monthly_payment}
-            secondaryLabel="Plată/lună"
+            secondaryLabel={t.monthlyPayment}
             showSecondary={true}
             badgeContent={
               <Badge variant="danger">
-                {LIABILITY_TYPE_LABELS[liability.liability_type]}
+                {LIABILITY_TYPE_LABELS_I18N[liability.liability_type]}
               </Badge>
             }
             onUpdate={async (label, balance, monthlyPayment) => {
@@ -83,7 +93,7 @@ export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
               autoFocus
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Denumire datorie"
+              placeholder={t.liabilityName}
               className="w-full text-sm bg-transparent border-b border-red-300 dark:border-red-600 focus:outline-none text-gray-900 dark:text-gray-100"
             />
             <div className="flex gap-2">
@@ -97,7 +107,7 @@ export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
               <input
                 value={newBalance}
                 onChange={(e) => setNewBalance(e.target.value)}
-                placeholder="Sold"
+                placeholder={t.amount}
                 type="text"
                 inputMode="decimal"
                 className="w-24 text-sm bg-transparent border-b border-red-300 dark:border-red-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
@@ -105,22 +115,22 @@ export const LiabilitiesSection: React.FC<LiabilitiesSectionProps> = ({
               <input
                 value={newPayment}
                 onChange={(e) => setNewPayment(e.target.value)}
-                placeholder="Plată/lună"
+                placeholder={t.monthlyPayment}
                 type="text"
                 inputMode="decimal"
                 className="w-24 text-sm bg-transparent border-b border-red-300 dark:border-red-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="primary" onClick={handleAdd}>Adaugă</Button>
-              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Anulează</Button>
+              <Button size="sm" variant="primary" onClick={handleAdd}>{t.addCategory}</Button>
+              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>{t.cancel}</Button>
             </div>
           </div>
         )}
 
         {liabilities.length === 0 && !adding && (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-            Adaugă datoriile tale (credite, carduri etc.)
+            {t.noLiabilities}
           </p>
         )}
       </div>

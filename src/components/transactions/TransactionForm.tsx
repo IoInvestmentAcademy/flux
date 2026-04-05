@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { Button, Input, Select } from '../ui'
 import { cn, todayISO } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { Category, CustomFieldDefinition, Transaction } from '../../types'
 
 const schema = z.object({
@@ -39,6 +40,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = usePreferences()
   const {
     register,
     handleSubmit,
@@ -70,7 +72,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   )
 
   const categoryOptions = [
-    { value: '', label: '— Fără categorie —' },
+    { value: '', label: `— ${t.noCategory} —` },
     ...filteredCategories.map((c) => ({ value: c.id, label: c.name })),
   ]
 
@@ -107,7 +109,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           )}
         >
           <TrendingDown className="w-4 h-4" />
-          Cheltuială
+          {t.expense}
         </button>
         <button
           type="button"
@@ -120,13 +122,13 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           )}
         >
           <TrendingUp className="w-4 h-4" />
-          Venit
+          {t.incomeLabel}
         </button>
       </div>
 
       {/* Amount */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sumă</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.amount}</label>
         <div className="relative">
           <input
             {...register('amount')}
@@ -148,7 +150,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
       {/* Date */}
       <Input
-        label="Data"
+        label={t.date}
         type="date"
         {...register('date')}
         error={errors.date?.message}
@@ -160,7 +162,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         name="category_id"
         render={({ field }) => (
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Categorie</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.category}</label>
             <div className="relative">
               {/* Color dot preview */}
               {field.value && (
@@ -191,20 +193,20 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
 
       {/* Detail */}
       <Input
-        label="Detaliu"
+        label={t.detail}
         type="text"
-        placeholder="ex. Piața Obor, Kaufland..."
+        placeholder={t.detailPlaceholder}
         {...register('detail')}
         error={errors.detail?.message}
       />
 
       {/* Note */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Notă (opțional)</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.noteOptional}</label>
         <textarea
           {...register('note')}
           rows={2}
-          placeholder="Notă suplimentară..."
+          placeholder={t.notePlaceholder}
           className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
         />
       </div>
@@ -262,10 +264,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
-          Anulează
+          {t.cancel}
         </Button>
         <Button type="submit" variant="primary" className="flex-1" loading={loading}>
-          {initialData?.id ? 'Salvează' : 'Adaugă'}
+          {t.save}
         </Button>
       </div>
     </form>

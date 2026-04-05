@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Card, CardHeader, CardTitle } from '../ui'
-import { formatRON } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { Transaction, Category } from '../../types'
 
 interface CategoryBreakdownProps {
@@ -21,6 +21,7 @@ export const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
   categories,
   type = 'expense',
 }) => {
+  const { t, formatMoney } = usePreferences()
   const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
 
   const breakdown = useMemo((): CategoryTotal[] => {
@@ -50,16 +51,16 @@ export const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
     <Card>
       <CardHeader>
         <CardTitle>
-          {type === 'expense' ? 'Cheltuieli' : 'Venituri'} pe categorii
+          {type === 'expense' ? t.expenses : t.income} {t.category.toLowerCase()}
         </CardTitle>
         <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
-          Total: {formatRON(grandTotal)}
+          {t.totalSpent}: {formatMoney(grandTotal)}
         </span>
       </CardHeader>
 
       {breakdown.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-4">
-          Nicio {type === 'expense' ? 'cheltuială' : 'venit'} în perioada selectată.
+          {t.noDataForPeriod}
         </p>
       ) : (
         <div className="space-y-3">
@@ -72,15 +73,15 @@ export const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
                     style={{ backgroundColor: item.category?.color ?? '#94a3b8' }}
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {item.category?.name ?? 'Fără categorie'}
+                    {item.category?.name ?? t.noCategory}
                   </span>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    ({item.count} tranzacții)
+                    ({item.count} {t.transactionsFound})
                   </span>
                 </div>
                 <div className="text-right">
                   <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
-                    {formatRON(item.total)}
+                    {formatMoney(item.total)}
                   </span>
                   <span className="text-xs text-gray-400 ml-1">
                     {item.percentage.toFixed(1)}%

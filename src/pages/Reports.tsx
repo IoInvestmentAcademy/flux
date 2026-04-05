@@ -7,27 +7,14 @@ import { SpendingTrends } from '../components/reports/SpendingTrends'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useToast } from '../components/ui/ToastProvider'
-import { getMonthRange, MONTHS_RO, exportTransactionsToCSV } from '../lib/utils'
+import { getMonthRange, exportTransactionsToCSV } from '../lib/utils'
+import { usePreferences } from '../lib/PreferencesContext'
 
 interface ReportsProps {
   userId: string
 }
 
 type PeriodType = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'custom'
-
-interface Period {
-  label: string
-  value: PeriodType
-}
-
-const PERIODS: Period[] = [
-  { label: 'Luna aceasta', value: 'this_month' },
-  { label: 'Luna trecută', value: 'last_month' },
-  { label: 'Ultimele 3 luni', value: 'last_3_months' },
-  { label: 'Ultimele 6 luni', value: 'last_6_months' },
-  { label: 'Anul acesta', value: 'this_year' },
-  { label: 'Personalizat', value: 'custom' },
-]
 
 function getPeriodDates(period: PeriodType, customFrom: string, customTo: string): { from: string; to: string } {
   const now = new Date()
@@ -61,10 +48,20 @@ function getPeriodDates(period: PeriodType, customFrom: string, customTo: string
 }
 
 export const Reports: React.FC<ReportsProps> = ({ userId }) => {
+  const { t, formatMoney } = usePreferences()
   const [period, setPeriod] = useState<PeriodType>('this_month')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const { showSuccess, showError } = useToast()
+
+  const PERIODS = [
+    { label: t.currentMonth, value: 'this_month' as PeriodType },
+    { label: t.lastMonthLabel, value: 'last_month' as PeriodType },
+    { label: t.last3MonthsLabel, value: 'last_3_months' as PeriodType },
+    { label: t.last6MonthsLabel, value: 'last_6_months' as PeriodType },
+    { label: t.thisYearLabel, value: 'this_year' as PeriodType },
+    { label: t.custom, value: 'custom' as PeriodType },
+  ]
 
   const { from, to } = getPeriodDates(period, customFrom, customTo)
 
@@ -87,11 +84,11 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
 
   const handleExport = () => {
     if (transactions.length === 0) {
-      showError('Nu există tranzacții de exportat în perioada selectată.')
+      showError(t.noDataForPeriod)
       return
     }
-    exportTransactionsToCSV(transactions, (id) => catMap.get(id ?? '')?.name ?? 'Fără categorie')
-    showSuccess('Fișierul CSV a fost descărcat!')
+    exportTransactionsToCSV(transactions, (id) => catMap.get(id ?? '')?.name ?? t.noCategory)
+    showSuccess(t.exportCSV)
   }
 
   return (
@@ -99,8 +96,8 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="hidden md:block">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rapoarte</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Analizează-ți obiceiurile financiare</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.reports}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.reportsTitle}</p>
         </div>
         <Button
           variant="secondary"
@@ -108,7 +105,7 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
           leftIcon={<Download className="w-4 h-4" />}
           onClick={handleExport}
         >
-          Export CSV
+          {t.exportCSV}
         </Button>
       </div>
 
@@ -134,7 +131,7 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
         {period === 'custom' && (
           <div className="flex gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 px-1">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">De la</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">{t.dateFrom}</label>
               <input
                 type="date"
                 value={customFrom}
@@ -143,7 +140,7 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Până la</label>
+              <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">{t.dateTo}</label>
               <input
                 type="date"
                 value={customTo}
@@ -158,14 +155,14 @@ export const Reports: React.FC<ReportsProps> = ({ userId }) => {
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Venituri', value: totalIncome, color: 'text-green-600 dark:text-green-400' },
-          { label: 'Cheltuieli', value: totalExpenses, color: 'text-red-500' },
+          { label: t.income, value: totalIncome, color: 'text-green-600 dark:text-green-400' },
+          { label: t.expenses, value: totalExpenses, color: 'text-red-500' },
           { label: 'Net', value: totalIncome - totalExpenses, color: totalIncome - totalExpenses >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-500' },
         ].map((item) => (
           <Card key={item.label} padding="sm">
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{item.label}</p>
             <p className={`text-base font-bold tabular-nums ${item.color}`}>
-              {new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.value)} lei
+              {formatMoney(item.value)}
             </p>
           </Card>
         ))}

@@ -4,7 +4,8 @@ import {
   ResponsiveContainer, Legend,
 } from 'recharts'
 import { Card, CardHeader, CardTitle, Skeleton } from '../ui'
-import { formatRON, getLast6MonthRanges, getMonthRange } from '../../lib/utils'
+import { getLast6MonthRanges, getMonthRange } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import { supabase } from '../../lib/supabase'
 
 interface ChartDataPoint {
@@ -18,6 +19,7 @@ interface CashFlowChartProps {
 }
 
 export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
+  const { t, formatMoney } = usePreferences()
   const [data, setData] = useState<ChartDataPoint[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -61,7 +63,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Flux de numerar</CardTitle>
+          <CardTitle>{t.cashFlow6months}</CardTitle>
         </CardHeader>
         <Skeleton className="h-48" />
       </Card>
@@ -71,7 +73,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Flux de numerar (6 luni)</CardTitle>
+        <CardTitle>{t.cashFlow6months}</CardTitle>
       </CardHeader>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -95,7 +97,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
             width={35}
           />
           <Tooltip
-            formatter={((value: unknown, name: string) => [formatRON(Number(value ?? 0)), name]) as never}
+            formatter={((value: unknown, name: string) => [formatMoney(Number(value ?? 0)), name]) as never}
             contentStyle={{
               borderRadius: '12px',
               border: '1px solid #e5e7eb',
@@ -111,7 +113,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
           <Area
             type="monotone"
             dataKey="venituri"
-            name="Venituri"
+            name={t.income}
             stroke="#22c55e"
             strokeWidth={2}
             fill="url(#gradVenituri)"
@@ -121,7 +123,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({ userId }) => {
           <Area
             type="monotone"
             dataKey="cheltuieli"
-            name="Cheltuieli"
+            name={t.expenses}
             stroke="#ef4444"
             strokeWidth={2}
             fill="url(#gradCheltuieli)"

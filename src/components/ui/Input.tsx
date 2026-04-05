@@ -29,6 +29,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            inputMode={props.type === 'number' ? 'decimal' : props.inputMode}
             className={cn(
               'w-full rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-150',
               'px-3 py-2 text-sm',
@@ -41,6 +42,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               rightElement && 'pr-9',
               className
             )}
+            style={{ fontSize: '16px', ...props.style }}
             {...props}
           />
           {rightElement && (

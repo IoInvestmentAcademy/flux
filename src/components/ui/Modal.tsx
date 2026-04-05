@@ -80,6 +80,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           'relative z-10 w-full bg-white dark:bg-gray-900 shadow-xl',
           'rounded-t-2xl sm:rounded-2xl',
           'animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200',
+          'bottom-sheet',
           sizeClasses[size],
           className
         )}
@@ -101,7 +102,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         )}
 
         {/* Content */}
-        <div className="p-5">{children}</div>
+        <div className="p-5" style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>{children}</div>
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import React from 'react'
 import { X, Search, Filter } from 'lucide-react'
 import { Input, Button } from '../ui'
 import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { Category, FilterState } from '../../types'
 
 interface FiltersProps {
@@ -11,6 +12,8 @@ interface FiltersProps {
 }
 
 export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories }) => {
+  const { t } = usePreferences()
+
   const hasActiveFilters =
     filters.dateFrom || filters.dateTo || filters.type || filters.categoryIds.length > 0 || filters.detailSearch
 
@@ -31,11 +34,11 @@ export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
           <Filter className="w-4 h-4" />
-          Filtre
+          {t.filters}
         </div>
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearAll} leftIcon={<X className="w-3 h-3" />}>
-            Curăță filtrele
+            {t.clearFilters}
           </Button>
         )}
       </div>
@@ -43,13 +46,13 @@ export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories 
       {/* Date range */}
       <div className="grid grid-cols-2 gap-3">
         <Input
-          label="De la"
+          label={t.dateFrom}
           type="date"
           value={filters.dateFrom}
           onChange={(e) => onChange({ ...filters, dateFrom: e.target.value })}
         />
         <Input
-          label="Până la"
+          label={t.dateTo}
           type="date"
           value={filters.dateTo}
           onChange={(e) => onChange({ ...filters, dateTo: e.target.value })}
@@ -73,7 +76,7 @@ export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories 
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             )}
           >
-            {type === '' ? 'Toate' : type === 'expense' ? 'Cheltuieli' : 'Venituri'}
+            {type === '' ? t.all : type === 'expense' ? t.appliesToExpense : t.appliesToIncome}
           </button>
         ))}
       </div>
@@ -81,7 +84,7 @@ export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories 
       {/* Category multi-select */}
       {categories.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Categorii</p>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t.categories}</p>
           <div className="flex flex-wrap gap-1.5">
             {categories.map((cat) => {
               const isSelected = filters.categoryIds.includes(cat.id)
@@ -110,9 +113,9 @@ export const Filters: React.FC<FiltersProps> = ({ filters, onChange, categories 
 
       {/* Detail search */}
       <Input
-        label="Caută detaliu"
+        label={t.detail}
         type="text"
-        placeholder="ex. Kaufland, shaorma..."
+        placeholder={t.detailPlaceholder}
         value={filters.detailSearch}
         onChange={(e) => onChange({ ...filters, detailSearch: e.target.value })}
         leftElement={<Search className="w-4 h-4" />}

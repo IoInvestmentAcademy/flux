@@ -8,6 +8,8 @@ import { categoryTypeLabel } from '../lib/categories'
 import type { Category, CustomFieldDefinition, CustomFieldType, CustomFieldAppliesTo } from '../types'
 import { useAuth } from '../hooks/useAuth'
 import { cn } from '../lib/utils'
+import { usePreferences } from '../lib/PreferencesContext'
+import type { Language, Currency } from '../lib/i18n'
 
 interface SettingsProps {
   userId: string
@@ -15,18 +17,6 @@ interface SettingsProps {
 
 type ThemeMode = 'light' | 'dark' | 'system'
 
-const FIELD_TYPE_OPTIONS = [
-  { value: 'text', label: 'Text' },
-  { value: 'number', label: 'Număr' },
-  { value: 'boolean', label: 'Da/Nu' },
-  { value: 'select', label: 'Listă' },
-]
-
-const APPLIES_TO_OPTIONS = [
-  { value: 'expense', label: 'Cheltuieli' },
-  { value: 'income', label: 'Venituri' },
-  { value: 'both', label: 'Ambele' },
-]
 
 const CATEGORY_COLORS = [
   '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#06b6d4',
@@ -51,10 +41,24 @@ function applyTheme(theme: ThemeMode) {
 
 export const Settings: React.FC<SettingsProps> = ({ userId }) => {
   const { user } = useAuth()
+  const { t, language, currency, setLanguage, setCurrency } = usePreferences()
   const { showSuccess, showError } = useToast()
   const { categories, addCategory, updateCategory, deleteCategory } = useCategories(userId)
   const { fields, addField, updateField, deleteField } = useCustomFields(userId)
   const [theme, setTheme] = useState<ThemeMode>(getStoredTheme)
+
+  const FIELD_TYPE_OPTIONS = [
+    { value: 'text', label: t.textField },
+    { value: 'number', label: t.numberField },
+    { value: 'boolean', label: t.booleanField },
+    { value: 'select', label: t.selectField },
+  ]
+
+  const APPLIES_TO_OPTIONS = [
+    { value: 'expense', label: t.appliesToExpense },
+    { value: 'income', label: t.appliesToIncome },
+    { value: 'both', label: t.appliesToBoth },
+  ]
 
   // Category form state
   const [showCatModal, setShowCatModal] = useState(false)
@@ -93,19 +97,19 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
     if (editingCat) {
       const { error } = await updateCategory(editingCat.id, { name: catName, color: catColor, type: catType })
       if (error) showError(error)
-      else { showSuccess('Categorie actualizată!'); setShowCatModal(false) }
+      else { showSuccess(t.categoryUpdated); setShowCatModal(false) }
     } else {
       const { error } = await addCategory({ name: catName, icon: 'tag', color: catColor, type: catType, is_default: false })
       if (error) showError(error)
-      else { showSuccess('Categorie adăugată!'); setShowCatModal(false) }
+      else { showSuccess(t.categoryAdded); setShowCatModal(false) }
     }
     setCatLoading(false)
   }
   const handleDeleteCat = async (id: string) => {
-    if (!confirm('Ești sigur? Tranzacțiile asociate vor rămâne fără categorie.')) return
+    if (!confirm(t.deleteCategoryConfirm)) return
     const { error } = await deleteCategory(id)
     if (error) showError(error)
-    else showSuccess('Categorie ștearsă!')
+    else showSuccess(t.categoryDeleted)
   }
 
   // Custom field CRUD
@@ -128,31 +132,31 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
     if (editingField) {
       const { error } = await updateField(editingField.id, data)
       if (error) showError(error)
-      else { showSuccess('Câmp actualizat!'); setShowFieldModal(false) }
+      else { showSuccess(t.fieldUpdated); setShowFieldModal(false) }
     } else {
       const { error } = await addField(data)
       if (error) showError(error)
-      else { showSuccess('Câmp adăugat!'); setShowFieldModal(false) }
+      else { showSuccess(t.fieldAdded); setShowFieldModal(false) }
     }
     setFieldLoading(false)
   }
   const handleDeleteField = async (id: string) => {
-    if (!confirm('Ești sigur că vrei să ștergi acest câmp personalizat?')) return
+    if (!confirm(t.deleteFieldConfirm)) return
     const { error } = await deleteField(id)
     if (error) showError(error)
-    else showSuccess('Câmp șters!')
+    else showSuccess(t.fieldDeleted)
   }
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="hidden md:block">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Setări</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.settings}</h1>
       </div>
 
       {/* Profile */}
       <Card>
         <CardHeader>
-          <CardTitle>Profil</CardTitle>
+          <CardTitle>{t.profile}</CardTitle>
         </CardHeader>
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-lg font-bold">
@@ -160,7 +164,56 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user?.email}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Cont activ</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t.activeAccount}</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Preferences: Language + Currency */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.preferences}</CardTitle>
+        </CardHeader>
+        <div className="space-y-4">
+          {/* Language */}
+          <div>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.language}</p>
+            <div className="flex gap-2">
+              {(['ro', 'en'] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setLanguage(lang)}
+                  className={cn(
+                    'flex-1 py-2 px-3 rounded-xl border text-sm font-medium transition-all',
+                    language === lang
+                      ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                  )}
+                >
+                  {lang === 'ro' ? 'Română' : 'English'}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Currency */}
+          <div>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t.currency}</p>
+            <div className="flex gap-2">
+              {(['RON', 'USD', 'EUR'] as Currency[]).map((cur) => (
+                <button
+                  key={cur}
+                  onClick={() => setCurrency(cur)}
+                  className={cn(
+                    'flex-1 py-2 px-3 rounded-xl border text-sm font-medium transition-all',
+                    currency === cur
+                      ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                  )}
+                >
+                  {cur === 'RON' ? 'RON (lei)' : cur === 'USD' ? 'USD ($)' : 'EUR (€)'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </Card>
@@ -168,26 +221,26 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
       {/* Theme */}
       <Card>
         <CardHeader>
-          <CardTitle>Temă</CardTitle>
+          <CardTitle>{t.theme}</CardTitle>
         </CardHeader>
         <div className="flex gap-3">
           {([
-            { value: 'light', label: 'Luminos', icon: <Sun className="w-4 h-4" /> },
-            { value: 'dark', label: 'Întunecat', icon: <Moon className="w-4 h-4" /> },
-            { value: 'system', label: 'Sistem', icon: <Monitor className="w-4 h-4" /> },
-          ] as { value: ThemeMode; label: string; icon: React.ReactNode }[]).map((t) => (
+            { value: 'light', label: t.light, icon: <Sun className="w-4 h-4" /> },
+            { value: 'dark', label: t.dark, icon: <Moon className="w-4 h-4" /> },
+            { value: 'system', label: t.system, icon: <Monitor className="w-4 h-4" /> },
+          ] as { value: ThemeMode; label: string; icon: React.ReactNode }[]).map((themeOption) => (
             <button
-              key={t.value}
-              onClick={() => setTheme(t.value)}
+              key={themeOption.value}
+              onClick={() => setTheme(themeOption.value)}
               className={cn(
                 'flex-1 flex flex-col items-center gap-2 py-3 px-2 rounded-xl border text-sm font-medium transition-all',
-                theme === t.value
+                theme === themeOption.value
                   ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
                   : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
               )}
             >
-              {t.icon}
-              {t.label}
+              {themeOption.icon}
+              {themeOption.label}
             </button>
           ))}
         </div>
@@ -196,9 +249,9 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
       {/* Categories */}
       <Card>
         <CardHeader>
-          <CardTitle>Categorii ({categories.length})</CardTitle>
+          <CardTitle>{t.categories} ({categories.length})</CardTitle>
           <Button size="sm" variant="primary" leftIcon={<Plus className="w-4 h-4" />} onClick={openAddCat}>
-            Adaugă
+            {t.addCategory}
           </Button>
         </CardHeader>
         <div className="space-y-1 max-h-80 overflow-y-auto">
@@ -234,14 +287,14 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
       {/* Custom Fields */}
       <Card>
         <CardHeader>
-          <CardTitle>Câmpuri personalizate ({fields.length})</CardTitle>
+          <CardTitle>{t.customFieldsSection} ({fields.length})</CardTitle>
           <Button size="sm" variant="primary" leftIcon={<Plus className="w-4 h-4" />} onClick={openAddField}>
-            Adaugă
+            {t.addField}
           </Button>
         </CardHeader>
         {fields.length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-            Adaugă câmpuri personalizate pentru tranzacțiile tale.
+            {t.noCustomFields}
           </p>
         ) : (
           <div className="space-y-1">
@@ -255,7 +308,7 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     {FIELD_TYPE_OPTIONS.find((o) => o.value === field.field_type)?.label} ·{' '}
                     {APPLIES_TO_OPTIONS.find((o) => o.value === field.applies_to)?.label}
-                    {field.is_required && ' · Obligatoriu'}
+                    {field.is_required && ` · ${t.requiredField}`}
                   </p>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -282,18 +335,18 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
       <Modal
         isOpen={showCatModal}
         onClose={() => setShowCatModal(false)}
-        title={editingCat ? 'Editează categorie' : 'Categorie nouă'}
+        title={editingCat ? t.editCategory : t.newCategory}
       >
         <div className="space-y-4">
           <Input
-            label="Nume categorie"
+            label={t.categoryName}
             value={catName}
             onChange={(e) => setCatName(e.target.value)}
-            placeholder="ex. Mâncare, Transport..."
+            placeholder={t.categoryNamePlaceholder}
             autoFocus
           />
           <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">Culoare</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">{t.categoryColor}</label>
             <div className="flex flex-wrap gap-2">
               {CATEGORY_COLORS.map((color) => (
                 <button
@@ -310,17 +363,17 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
             </div>
           </div>
           <Select
-            label="Tip"
+            label={t.categoryType}
             value={catType}
             onChange={(e) => setCatType(e.target.value as Category['type'])}
             options={APPLIES_TO_OPTIONS}
           />
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1" onClick={() => setShowCatModal(false)}>
-              Anulează
+              {t.cancel}
             </Button>
             <Button variant="primary" className="flex-1" onClick={handleSaveCat} loading={catLoading}>
-              Salvează
+              {t.save}
             </Button>
           </div>
         </div>
@@ -330,34 +383,34 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
       <Modal
         isOpen={showFieldModal}
         onClose={() => setShowFieldModal(false)}
-        title={editingField ? 'Editează câmp' : 'Câmp personalizat nou'}
+        title={editingField ? t.editField : t.newField}
       >
         <div className="space-y-4">
           <Input
-            label="Nume câmp"
+            label={t.fieldName}
             value={fieldName}
             onChange={(e) => setFieldName(e.target.value)}
-            placeholder="ex. Număr factură..."
+            placeholder={t.fieldNamePlaceholder}
             autoFocus
           />
           <Select
-            label="Tip câmp"
+            label={t.fieldType}
             value={fieldType}
             onChange={(e) => setFieldType(e.target.value as CustomFieldType)}
             options={FIELD_TYPE_OPTIONS}
           />
           <Select
-            label="Se aplică la"
+            label={t.fieldAppliesTo}
             value={fieldAppliesTo}
             onChange={(e) => setFieldAppliesTo(e.target.value as CustomFieldAppliesTo)}
             options={APPLIES_TO_OPTIONS}
           />
           {fieldType === 'select' && (
             <Input
-              label="Opțiuni (separate prin virgulă)"
+              label={t.fieldOptions}
               value={fieldOptions}
               onChange={(e) => setFieldOptions(e.target.value)}
-              placeholder="Opțiunea 1, Opțiunea 2..."
+              placeholder={t.fieldOptionsPlaceholder}
             />
           )}
           <label className="flex items-center gap-2 cursor-pointer">
@@ -367,14 +420,14 @@ export const Settings: React.FC<SettingsProps> = ({ userId }) => {
               onChange={(e) => setFieldRequired(e.target.checked)}
               className="w-4 h-4 rounded text-indigo-500"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Câmp obligatoriu</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">{t.requiredField}</span>
           </label>
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1" onClick={() => setShowFieldModal(false)}>
-              Anulează
+              {t.cancel}
             </Button>
             <Button variant="primary" className="flex-1" onClick={handleSaveField} loading={fieldLoading}>
-              Salvează
+              {t.save}
             </Button>
           </div>
         </div>

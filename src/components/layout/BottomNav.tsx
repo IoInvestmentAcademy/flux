@@ -1,25 +1,31 @@
 import React from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ArrowLeftRight, BarChart2, Settings, Plus } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 
 interface BottomNavProps {
   onAddTransaction: () => void
 }
 
-const leftItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/tranzactii', icon: ArrowLeftRight, label: 'Tranzacții' },
-]
-
-const rightItems = [
-  { to: '/rapoarte', icon: BarChart2, label: 'Rapoarte' },
-  { to: '/setari', icon: Settings, label: 'Setări' },
-]
-
 export const BottomNav: React.FC<BottomNavProps> = ({ onAddTransaction }) => {
+  const { t } = usePreferences()
+
+  const leftItems = [
+    { to: '/', icon: LayoutDashboard, label: t.dashboard },
+    { to: '/tranzactii', icon: ArrowLeftRight, label: t.transactions },
+  ]
+
+  const rightItems = [
+    { to: '/rapoarte', icon: BarChart2, label: t.reports },
+    { to: '/setari', icon: Settings, label: t.settings },
+  ]
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 safe-area-pb">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       <div className="flex items-center justify-around h-16">
         {leftItems.map(({ to, icon: Icon, label }) => (
           <NavLink
@@ -28,7 +34,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onAddTransaction }) => {
             end={to === '/'}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl transition-colors min-w-0',
+                'flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl transition-colors min-w-0 min-h-[44px] justify-center',
                 isActive
                   ? 'text-indigo-600 dark:text-indigo-400'
                   : 'text-gray-400 dark:text-gray-500'
@@ -55,7 +61,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onAddTransaction }) => {
             to={to}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl transition-colors min-w-0',
+                'flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl transition-colors min-w-0 min-h-[44px] justify-center',
                 isActive
                   ? 'text-indigo-600 dark:text-indigo-400'
                   : 'text-gray-400 dark:text-gray-500'

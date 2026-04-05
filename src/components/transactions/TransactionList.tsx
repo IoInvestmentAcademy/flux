@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
-import { formatRelativeDateRO, formatRON } from '../../lib/utils'
+import { formatRelativeDate } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import { TransactionCard } from './TransactionCard'
 import { SkeletonList, EmptyState } from '../ui'
 import type { Transaction, Category, CustomFieldDefinition } from '../../types'
@@ -28,6 +29,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { t, formatMoney, language } = usePreferences()
   const categoryMap = useMemo(() => {
     const map = new Map<string, Category>()
     categories.forEach((c) => map.set(c.id, c))
@@ -69,8 +71,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   if (transactions.length === 0) {
     return (
       <EmptyState
-        title="Nicio tranzacție"
-        description="Adaugă prima ta tranzacție apăsând butonul + de mai jos."
+        title={t.noTransactions}
+        description={t.addFirstTransactionHint}
       />
     )
   }
@@ -82,17 +84,17 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           {/* Date header */}
           <div className="flex items-center justify-between mb-2 px-1">
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              {formatRelativeDateRO(group.date)}
+              {formatRelativeDate(group.date, language)}
             </span>
             <div className="flex items-center gap-3 text-xs">
               {group.totalIncome > 0 && (
                 <span className="text-green-600 dark:text-green-400 font-medium">
-                  +{formatRON(group.totalIncome)}
+                  +{formatMoney(group.totalIncome)}
                 </span>
               )}
               {group.totalExpenses > 0 && (
                 <span className="text-red-500 dark:text-red-400 font-medium">
-                  −{formatRON(group.totalExpenses)}
+                  −{formatMoney(group.totalExpenses)}
                 </span>
               )}
             </div>

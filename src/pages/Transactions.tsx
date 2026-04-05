@@ -8,6 +8,7 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useCustomFields } from '../hooks/useCustomFields'
 import { useToast } from '../components/ui/ToastProvider'
+import { usePreferences } from '../lib/PreferencesContext'
 import type { Transaction, FilterState } from '../types'
 
 interface TransactionsProps {
@@ -23,6 +24,7 @@ const EMPTY_FILTERS: FilterState = {
 }
 
 export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
+  const { t } = usePreferences()
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [showFilters, setShowFilters] = useState(false)
@@ -46,7 +48,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
     if (error) {
       showError(error)
     } else {
-      showSuccess('Tranzacție adăugată!')
+      showSuccess(t.transactionAdded)
       setShowAddModal(false)
     }
   }
@@ -59,18 +61,18 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
     if (error) {
       showError(error)
     } else {
-      showSuccess('Tranzacție actualizată!')
+      showSuccess(t.transactionUpdated)
       setEditingTransaction(null)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Ești sigur că vrei să ștergi această tranzacție?')) return
+    if (!confirm(t.deleteTransactionConfirm)) return
     const { error } = await deleteTransaction(id)
     if (error) {
       showError(error)
     } else {
-      showSuccess('Tranzacție ștearsă!')
+      showSuccess(t.transactionDeleted)
     }
   }
 
@@ -79,9 +81,9 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="hidden md:block">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Tranzacții</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.transactions}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {transactions.length} tranzacții găsite
+            {transactions.length} {t.transactionsFound}
           </p>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
@@ -91,7 +93,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
             leftIcon={showFilters ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
             onClick={() => setShowFilters((v) => !v)}
           >
-            {showFilters ? 'Ascunde filtrele' : 'Filtre'}
+            {showFilters ? t.hideFilters : t.filters}
             {hasActiveFilters && !showFilters && (
               <span className="ml-1 bg-indigo-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                 !
@@ -105,7 +107,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
             onClick={() => setShowAddModal(true)}
             className="hidden md:flex"
           >
-            Adaugă tranzacție
+            {t.newTransaction}
           </Button>
         </div>
       </div>
@@ -142,7 +144,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title="Tranzacție nouă"
+        title={t.newTransaction}
       >
         <TransactionForm
           categories={categories}
@@ -157,7 +159,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
       <Modal
         isOpen={!!editingTransaction}
         onClose={() => setEditingTransaction(null)}
-        title="Editează tranzacție"
+        title={t.editTransaction}
       >
         {editingTransaction && (
           <TransactionForm

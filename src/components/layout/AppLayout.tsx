@@ -49,7 +49,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, userEmail, onLog
   }, [location.pathname])
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+    <div className="flex h-full bg-gray-50 dark:bg-gray-950 overflow-hidden">
       {/* Desktop Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
@@ -85,11 +85,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, userEmail, onLog
         {/* Page Content */}
         <main
           className={cn(
-            'flex-1 overflow-y-auto pb-20 md:pb-6',
+            'flex-1 scroll-area pb-20 md:pb-6',
             'px-4 md:px-6 py-4 md:py-6'
           )}
         >
-          {children}
+          <div key={location.pathname} className="page-enter h-full">
+            {children}
+          </div>
         </main>
 
         {/* Mobile Bottom Nav */}

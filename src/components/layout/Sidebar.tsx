@@ -5,6 +5,7 @@ import {
   ChevronLeft, ChevronRight, Zap, LogOut,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 
 interface SidebarProps {
   collapsed: boolean
@@ -13,21 +14,24 @@ interface SidebarProps {
   onLogout: () => void
 }
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/tranzactii', icon: ArrowLeftRight, label: 'Tranzacții' },
-  { to: '/fisa-financiara', icon: FileText, label: 'Fișă Financiară' },
-  { to: '/rapoarte', icon: BarChart2, label: 'Rapoarte' },
-  { to: '/setari', icon: Settings, label: 'Setări' },
-]
-
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail, onLogout }) => {
+  const { t } = usePreferences()
+
+  const navItems = [
+    { to: '/', icon: LayoutDashboard, label: t.dashboard },
+    { to: '/tranzactii', icon: ArrowLeftRight, label: t.transactions },
+    { to: '/fisa-financiara', icon: FileText, label: t.financialSheet },
+    { to: '/rapoarte', icon: BarChart2, label: t.reports },
+    { to: '/setari', icon: Settings, label: t.settings },
+  ]
+
   return (
     <aside
       className={cn(
         'hidden md:flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 shrink-0',
         collapsed ? 'w-16' : 'w-60'
       )}
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       {/* Logo */}
       <div className={cn('flex items-center h-16 px-4 border-b border-gray-100 dark:border-gray-800', collapsed && 'justify-center')}>
@@ -44,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-4 px-2 space-y-0.5 scroll-area">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -90,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail
           )}
         >
           <LogOut className="w-4 h-4 shrink-0" />
-          {!collapsed && <span>Deconectare</span>}
+          {!collapsed && <span>{t.logout}</span>}
         </button>
         <button
           onClick={onToggle}
@@ -101,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail
           aria-label={collapsed ? 'Extinde bara laterală' : 'Restrânge bara laterală'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          {!collapsed && <span className="text-sm text-gray-400">Restrânge</span>}
+          {!collapsed && <span className="text-sm text-gray-400">{t.collapse}</span>}
         </button>
       </div>
     </aside>

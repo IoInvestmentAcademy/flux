@@ -1,7 +1,8 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { Card, CardHeader, CardTitle, Skeleton, EmptyState } from '../ui'
-import { formatRON, getMonthRange } from '../../lib/utils'
+import { getMonthRange } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import { supabase } from '../../lib/supabase'
 import type { Category } from '../../types'
 
@@ -17,6 +18,7 @@ interface DonutData {
 }
 
 export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories }) => {
+  const { t, formatMoney } = usePreferences()
   const [data, setData] = useState<DonutData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -46,7 +48,7 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories
         const sorted = Array.from(totals.entries())
           .map(([catId, value]) => {
             const cat = catMap.get(catId)
-            return { name: cat?.name ?? 'Fără categorie', value, color: cat?.color ?? '#94a3b8' }
+            return { name: cat?.name ?? t.noCategory, value, color: cat?.color ?? '#94a3b8' }
           })
           .sort((a, b) => b.value - a.value)
           .slice(0, 6)
@@ -64,7 +66,7 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories
   if (loading) {
     return (
       <Card>
-        <CardHeader><CardTitle>Cheltuieli pe categorii</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.categoryExpenses}</CardTitle></CardHeader>
         <Skeleton className="h-48 w-48 rounded-full mx-auto" />
       </Card>
     )
@@ -73,8 +75,8 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories
   if (data.length === 0) {
     return (
       <Card>
-        <CardHeader><CardTitle>Cheltuieli pe categorii</CardTitle></CardHeader>
-        <EmptyState title="Nicio cheltuială" description="Nu ai cheltuieli în luna curentă." />
+        <CardHeader><CardTitle>{t.categoryExpenses}</CardTitle></CardHeader>
+        <EmptyState title={t.noExpenses} description={t.noExpensesThisMonth} />
       </Card>
     )
   }
@@ -84,7 +86,7 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cheltuieli pe categorii</CardTitle>
+        <CardTitle>{t.categoryExpenses}</CardTitle>
       </CardHeader>
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>
@@ -102,7 +104,7 @@ export const CategoryDonut: React.FC<CategoryDonutProps> = ({ userId, categories
             ))}
           </Pie>
           <Tooltip
-            formatter={((value: unknown) => [formatRON(Number(value ?? 0)), 'Total']) as never}
+            formatter={((value: unknown) => [formatMoney(Number(value ?? 0)), 'Total']) as never}
             contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '12px' }}
           />
         </PieChart>

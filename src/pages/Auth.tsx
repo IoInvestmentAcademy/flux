@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { Zap } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import { useAuth } from '../hooks/useAuth'
+import { usePreferences } from '../lib/PreferencesContext'
 
 const loginSchema = z.object({
   email: z.string().email('Adresa de email nu este validă.'),
@@ -26,6 +27,7 @@ type RegisterForm = z.infer<typeof registerSchema>
 
 export const Auth: React.FC = () => {
   const { user, loading: authLoading, login, register } = useAuth()
+  const { t } = usePreferences()
   const [tab, setTab] = useState<'login' | 'register'>('login')
   const [authError, setAuthError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -73,7 +75,7 @@ export const Auth: React.FC = () => {
             <Zap className="w-8 h-8 text-white" fill="white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Flux</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Finanțele tale, simplu.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.appTagline}</p>
         </div>
 
         {/* Card */}
@@ -88,7 +90,7 @@ export const Auth: React.FC = () => {
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Autentificare
+              {t.login}
             </button>
             <button
               onClick={() => { setTab('register'); setAuthError(null); setSuccessMessage(null) }}
@@ -98,7 +100,7 @@ export const Auth: React.FC = () => {
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
-              Înregistrare
+              {t.register}
             </button>
           </div>
 
@@ -120,7 +122,7 @@ export const Auth: React.FC = () => {
           {tab === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <Input
-                label="Email"
+                label={t.email}
                 type="email"
                 placeholder="email@exemplu.ro"
                 autoComplete="email"
@@ -128,7 +130,7 @@ export const Auth: React.FC = () => {
                 error={loginForm.formState.errors.email?.message}
               />
               <Input
-                label="Parolă"
+                label={t.password}
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
@@ -136,7 +138,7 @@ export const Auth: React.FC = () => {
                 error={loginForm.formState.errors.password?.message}
               />
               <Button type="submit" variant="primary" className="w-full" size="lg" loading={isSubmitting}>
-                Autentifică-te
+                {isSubmitting ? t.loggingIn : t.loginBtn}
               </Button>
             </form>
           )}
@@ -145,7 +147,7 @@ export const Auth: React.FC = () => {
           {tab === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
               <Input
-                label="Email"
+                label={t.email}
                 type="email"
                 placeholder="email@exemplu.ro"
                 autoComplete="email"
@@ -153,23 +155,23 @@ export const Auth: React.FC = () => {
                 error={registerForm.formState.errors.email?.message}
               />
               <Input
-                label="Parolă"
+                label={t.password}
                 type="password"
-                placeholder="Minim 6 caractere"
+                placeholder="••••••"
                 autoComplete="new-password"
                 {...registerForm.register('password')}
                 error={registerForm.formState.errors.password?.message}
               />
               <Input
-                label="Confirmă parola"
+                label={t.confirmPassword}
                 type="password"
-                placeholder="Repetă parola"
+                placeholder="••••••"
                 autoComplete="new-password"
                 {...registerForm.register('confirmPassword')}
                 error={registerForm.formState.errors.confirmPassword?.message}
               />
               <Button type="submit" variant="primary" className="w-full" size="lg" loading={isSubmitting}>
-                Creează cont
+                {isSubmitting ? t.registering : t.registerBtn}
               </Button>
             </form>
           )}

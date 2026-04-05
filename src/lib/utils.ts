@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { AssetType, LiabilityType, Transaction } from '../types'
+import type { Language } from './i18n'
 
 // ─── Class name helper ────────────────────────────────────────────────────────
 // We bundle a minimal cn() without an extra package dependency
@@ -147,6 +148,33 @@ export function formatRelativeDateRO(dateStr: string): string {
   const diffMs = today.getTime() - date.getTime()
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
 
+  if (diffDays === 0) return 'Azi'
+  if (diffDays === 1) return 'Ieri'
+  if (diffDays >= 2 && diffDays <= 5) {
+    return date.toLocaleDateString('ro-RO', { weekday: 'long' })
+      .replace(/^\w/, (c) => c.toUpperCase())
+  }
+  return date.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+// ─── Smart relative date label (language-aware) ───────────────────────────────
+export function formatRelativeDate(dateStr: string, language: Language): string {
+  const date = new Date(dateStr + 'T00:00:00')
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const diffMs = today.getTime() - date.getTime()
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
+
+  if (language === 'en') {
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays >= 2 && diffDays <= 5) {
+      return date.toLocaleDateString('en-US', { weekday: 'long' })
+    }
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+  }
+
+  // Romanian (default)
   if (diffDays === 0) return 'Azi'
   if (diffDays === 1) return 'Ieri'
   if (diffDays >= 2 && diffDays <= 5) {

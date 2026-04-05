@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Card, CardHeader, CardTitle, Button } from '../ui'
 import { EditableRow } from './EditableRow'
-import { formatRON } from '../../lib/utils'
+import { usePreferences } from '../../lib/PreferencesContext'
 import type { FinancialIncome } from '../../types'
 
 interface IncomeSectionProps {
@@ -14,6 +14,7 @@ interface IncomeSectionProps {
 }
 
 export const IncomeSection: React.FC<IncomeSectionProps> = ({ incomes, total, onAdd, onUpdate, onDelete }) => {
+  const { t, formatMoney } = usePreferences()
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
@@ -31,10 +32,10 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ incomes, total, on
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Venituri lunare</CardTitle>
+        <CardTitle>{t.monthlyIncomeSection}</CardTitle>
         <div className="flex items-center gap-3">
           <span className="text-base font-bold text-green-600 dark:text-green-400 tabular-nums">
-            {formatRON(total)}
+            {formatMoney(total)}
           </span>
           <Button
             size="sm"
@@ -42,7 +43,7 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ incomes, total, on
             leftIcon={<Plus className="w-4 h-4" />}
             onClick={() => setAdding(true)}
           >
-            Adaugă
+            {t.addCategory}
           </Button>
         </div>
       </CardHeader>
@@ -68,26 +69,26 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ incomes, total, on
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              placeholder="Sursă de venit"
+              placeholder={t.sourceName}
               className="flex-1 min-w-0 text-sm bg-transparent border-b border-green-300 dark:border-green-600 focus:outline-none text-gray-900 dark:text-gray-100"
             />
             <input
               value={newAmount}
               onChange={(e) => setNewAmount(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              placeholder="Sumă"
+              placeholder={t.amount}
               type="text"
               inputMode="decimal"
               className="w-24 text-sm bg-transparent border-b border-green-300 dark:border-green-600 focus:outline-none text-right text-gray-900 dark:text-gray-100"
             />
-            <Button size="sm" variant="primary" onClick={handleAdd}>Adaugă</Button>
-            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Anulează</Button>
+            <Button size="sm" variant="primary" onClick={handleAdd}>{t.addCategory}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>{t.cancel}</Button>
           </div>
         )}
 
         {incomes.length === 0 && !adding && (
           <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
-            Adaugă sursele tale de venit lunar.
+            {t.noIncomes}
           </p>
         )}
       </div>
