@@ -6,7 +6,7 @@ interface UseCategoriesResult {
   categories: Category[]
   loading: boolean
   error: string | null
-  addCategory: (data: Omit<Category, 'id' | 'user_id' | 'created_at'>) => Promise<{ error: string | null }>
+  addCategory: (data: Omit<Category, 'id' | 'user_id' | 'created_at'>) => Promise<{ error: string | null; id?: string }>
   updateCategory: (id: string, data: Partial<Omit<Category, 'id' | 'user_id' | 'created_at'>>) => Promise<{ error: string | null }>
   deleteCategory: (id: string) => Promise<{ error: string | null }>
   getCategoryById: (id: string | null) => Category | undefined
@@ -47,16 +47,18 @@ export function useCategories(userId: string | null): UseCategoriesResult {
   }, [fetchCategories])
 
   const addCategory = useCallback(
-    async (data: Omit<Category, 'id' | 'user_id' | 'created_at'>): Promise<{ error: string | null }> => {
+    async (data: Omit<Category, 'id' | 'user_id' | 'created_at'>): Promise<{ error: string | null; id?: string }> => {
       if (!userId) return { error: 'Nu ești autentificat.' }
 
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from('categories')
         .insert({ ...data, user_id: userId })
+        .select('id')
+        .single()
 
       if (insertError) return { error: 'Eroare la salvarea categoriei.' }
       await fetchCategories()
-      return { error: null }
+      return { error: null, id: inserted?.id }
     },
     [userId, fetchCategories]
   )

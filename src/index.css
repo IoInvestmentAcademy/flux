@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
 /* ─── Mobile PWA Optimizations ────────────────────────────────────────────── */
 
 /* Remove iOS tap highlight */
@@ -43,6 +46,11 @@ button:active, [role="button"]:active {
 @keyframes pageSlideIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
 }
 
 .page-enter {
@@ -101,8 +109,8 @@ input[type=number]::-webkit-outer-spin-button {
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
   height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
@@ -111,9 +119,7 @@ body {
   background: #f9fafb;
   height: 100%;
   overflow: hidden;
-  position: fixed;
-  width: 100%;
-  /* Safe area for notch devices */
+  overscroll-behavior: none;
   padding-top: env(safe-area-inset-top);
 }
 
@@ -124,7 +130,6 @@ body {
 #root {
   height: 100%;
   overflow: hidden;
-  position: relative;
   display: flex;
   flex-direction: column;
 }

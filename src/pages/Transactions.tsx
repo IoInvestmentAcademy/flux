@@ -38,7 +38,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
     userId,
     filters,
   })
-  const { categories } = useCategories(userId)
+  const { categories, addCategory } = useCategories(userId)
   const { fields: customFields } = useCustomFields(userId)
 
   const handleAdd = async (data: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
@@ -152,6 +152,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
           onSubmit={handleAdd}
           onCancel={() => setShowAddModal(false)}
           loading={addLoading}
+          onAddCategory={addCategory}
         />
       </Modal>
 
@@ -169,6 +170,7 @@ export const Transactions: React.FC<TransactionsProps> = ({ userId }) => {
             onSubmit={handleUpdate}
             onCancel={() => setEditingTransaction(null)}
             loading={addLoading}
+            onAddCategory={addCategory}
           />
         )}
       </Modal>

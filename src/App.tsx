@@ -65,7 +65,7 @@ const ProtectedApp: React.FC<{ userId: string; userEmail: string; onLogout: () =
   const [addLoading, setAddLoading] = useState(false)
 
   const { addTransaction } = useTransactions({ userId })
-  const { categories } = useCategories(userId)
+  const { categories, addCategory } = useCategories(userId)
   const { fields: customFields } = useCustomFields(userId)
 
   const handleGlobalAdd = async (data: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
@@ -137,6 +137,7 @@ const ProtectedApp: React.FC<{ userId: string; userEmail: string; onLogout: () =
           onSubmit={handleGlobalAdd}
           onCancel={() => setShowGlobalAdd(false)}
           loading={addLoading}
+          onAddCategory={addCategory}
         />
       </Modal>
     </AppLayout>

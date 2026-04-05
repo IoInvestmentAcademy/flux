@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, ArrowLeftRight, FileText, BarChart2, Settings,
-  ChevronLeft, ChevronRight, Zap, LogOut,
+  ChevronLeft, ChevronRight, Zap, LogOut, X,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { usePreferences } from '../../lib/PreferencesContext'
@@ -12,9 +12,10 @@ interface SidebarProps {
   onToggle: () => void
   userEmail: string | null
   onLogout: () => void
+  mobile?: boolean
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail, onLogout, mobile = false }) => {
   const { t } = usePreferences()
 
   const navItems = [
@@ -28,23 +29,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, userEmail
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 shrink-0',
-        collapsed ? 'w-16' : 'w-60'
+        'flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 transition-all duration-300 shrink-0',
+        mobile ? 'w-64' : 'hidden md:flex',
+        !mobile && (collapsed ? 'w-16' : 'w-60')
       )}
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       {/* Logo */}
-      <div className={cn('flex items-center h-16 px-4 border-b border-gray-100 dark:border-gray-800', collapsed && 'justify-center')}>
+      <div className={cn('flex items-center justify-between h-16 px-4 border-b border-gray-100 dark:border-gray-800', collapsed && !mobile && 'justify-center')}>
         <div className="flex items-center gap-2 min-w-0">
           <div className="shrink-0 w-8 h-8 bg-indigo-500 rounded-xl flex items-center justify-center shadow-sm">
-            <Zap className="w-4.5 h-4.5 text-white" fill="white" />
+            <Zap className="w-4 h-4 text-white" fill="white" />
           </div>
-          {!collapsed && (
+          {(!collapsed || mobile) && (
             <span className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
               Flux
             </span>
           )}
         </div>
+        {mobile && (
+          <button
+            onClick={onToggle}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Închide meniu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}

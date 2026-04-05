@@ -62,13 +62,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, userEmail, onLog
       {mobileMenuOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/50"
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="md:hidden fixed left-0 top-0 bottom-0 z-50 w-64 bg-white dark:bg-gray-900 shadow-xl">
+          <div
+            className="fixed left-0 top-0 bottom-0 z-50 shadow-2xl"
+            style={{ animation: 'slideInLeft 0.25s ease-out' }}
+          >
             <Sidebar
               collapsed={false}
+              mobile={true}
               onToggle={() => setMobileMenuOpen(false)}
               userEmail={userEmail}
               onLogout={onLogout}
@@ -84,10 +88,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, userEmail, onLog
 
         {/* Page Content */}
         <main
-          className={cn(
-            'flex-1 scroll-area pb-20 md:pb-6',
-            'px-4 md:px-6 py-4 md:py-6'
-          )}
+          className="flex-1 scroll-area px-4 md:px-6 pt-4 md:pt-6 md:pb-6"
+          style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
         >
           <div key={location.pathname} className="page-enter h-full">
             {children}

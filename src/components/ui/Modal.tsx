@@ -80,14 +80,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           'relative z-10 w-full bg-white dark:bg-gray-900 shadow-xl',
           'rounded-t-2xl sm:rounded-2xl',
           'animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200',
-          'bottom-sheet',
+          'bottom-sheet flex flex-col',
+          'max-h-[92dvh] sm:max-h-[90vh]',
           sizeClasses[size],
           className
         )}
       >
-        {/* Header */}
+        {/* Header — fixed, never scrolls */}
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
             <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {title}
             </h2>
@@ -101,8 +102,13 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           </div>
         )}
 
-        {/* Content */}
-        <div className="p-5" style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>{children}</div>
+        {/* Content — scrollable */}
+        <div
+          className="overflow-y-auto overscroll-contain"
+          style={{ padding: '1.25rem', paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   )
